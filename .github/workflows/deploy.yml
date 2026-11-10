@@ -3,7 +3,7 @@ name: Deploy to GitHub Pages
 on:
   push:
     branches: [ "main" ]
-  workflow_dispatch: # 允许你在Actions页面手动触发
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -21,17 +21,24 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      # 新增：必须先装 pnpm，后面的 cache 和 install 才能用
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v5
+        with:
+          version: 11        # 按需改成你项目使用的 pnpm 版本
+          run_install: false
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 22 # 根据你的项目需要调整版本
-          cache: 'pnpm' # 如果使用 yarn 或 pnpm，请对应改为 'yarn' 或 'pnpm'
+          node-version: 22
+          cache: 'pnpm'
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile # 对应 yarn install --frozen-lockfile 或 pnpm install --frozen-lockfile
+        run: pnpm install --frozen-lockfile
 
       - name: Build project
-        run: pnpm build # 执行项目的构建脚本
+        run: pnpm build
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
@@ -39,7 +46,7 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: './dist' # 请将此处替换为你项目的实际构建输出目录（如 build, public 等）
+          path: './dist'
 
   deploy:
     environment:
